@@ -237,10 +237,10 @@ int32_t ForcedBMX280::getTemperatureCelsius(const bool performMeasurement) {
 /// This creates an object from the mandatory TwoWire-bus
 /// and the address of the chip to communicate with.
 #ifdef FORCED_BMX280_ATTINY
-ForcedBMX280_float::ForcedBMX280_float(USI_TWI& bus, const uint8_t address)
+ForcedBMX280Float::ForcedBMX280Float(USI_TWI& bus, const uint8_t address)
   :
 #else
-ForcedBMX280_float::ForcedBMX280_float(TwoWire& bus, const uint8_t address)
+ForcedBMX280Float::ForcedBMX280Float(TwoWire& bus, const uint8_t address)
   :
 #endif
     _bus(bus),
@@ -252,7 +252,7 @@ ForcedBMX280_float::ForcedBMX280_float(TwoWire& bus, const uint8_t address)
 /// Get Temperature Celsius
 /// \details
 /// This function retrieves the compensated temperature
-float ForcedBMX280_float::getTemperatureCelsius_float(const bool performMeasurement) {
+float ForcedBMX280Float::getTemperatureCelsiusAsFloat(const bool performMeasurement) {
   return float(getTemperatureCelsius(performMeasurement) / 100.0);
 }
 
@@ -354,10 +354,10 @@ uint32_t ForcedBMP280::getPressure(const bool performMeasurement) {
 /// This creates an object from the mandatory TwoWire-bus
 /// and the address of the chip to communicate with.
 #ifdef FORCED_BMX280_ATTINY
-ForcedBMP280_float::ForcedBMP280_float(USI_TWI& bus, const uint8_t address)
+ForcedBMP280Float::ForcedBMP280Float(USI_TWI& bus, const uint8_t address)
 :
 #else
-ForcedBMP280_float::ForcedBMP280_float(TwoWire& bus, const uint8_t address)
+ForcedBMP280Float::ForcedBMP280Float(TwoWire& bus, const uint8_t address)
 :
 #endif
     _bus(bus),
@@ -369,7 +369,7 @@ ForcedBMP280_float::ForcedBMP280_float(TwoWire& bus, const uint8_t address)
 /// Get Temperature Celsius
 /// \details
 /// This function retrieves the compensated temperature
-float ForcedBMP280_float::getTemperatureCelsius_float(const bool performMeasurement) {
+float ForcedBMP280Float::getTemperatureCelsiusAsFloat(const bool performMeasurement) {
   return float(getTemperatureCelsius(performMeasurement) / 100.0);
 }
 
@@ -378,7 +378,7 @@ float ForcedBMP280_float::getTemperatureCelsius_float(const bool performMeasurem
 /// Get Pressure
 /// \details
 /// This function retrieves the compensated pressure 
-float ForcedBMP280_float::getPressure_float(const bool performMeasurement) {
+float ForcedBMP280Float::getPressureAsFloat(const bool performMeasurement) {
   return float(getPressure(performMeasurement) / 100.0);
 }
 
@@ -510,10 +510,10 @@ uint32_t ForcedBME280::getRelativeHumidity(const bool performMeasurement) {
 /// This creates an object from the mandatory TwoWire-bus
 /// and the address of the chip to communicate with.
 #ifdef FORCED_BMX280_ATTINY
-ForcedBME280_float::ForcedBME280_float(USI_TWI& bus, const uint8_t address)
+ForcedBME280Float::ForcedBME280Float(USI_TWI& bus, const uint8_t address)
 :
 #else
-ForcedBME280_float::ForcedBME280_float(TwoWire& bus, const uint8_t address)
+ForcedBME280Float::ForcedBME280Float(TwoWire& bus, const uint8_t address)
 :
 #endif
     _bus(bus),
@@ -525,7 +525,7 @@ ForcedBME280_float::ForcedBME280_float(TwoWire& bus, const uint8_t address)
 /// Get Temperature Celsius
 /// \details
 /// This function retrieves the compensated temperature
-float ForcedBME280_float::getTemperatureCelsius_float(const bool performMeasurement) {
+float ForcedBME280Float::getTemperatureCelsiusAsFloat(const bool performMeasurement) {
   return float(getTemperatureCelsius(performMeasurement) / 100.0);
 }
 
@@ -533,7 +533,7 @@ float ForcedBME280_float::getTemperatureCelsius_float(const bool performMeasurem
 /// Get Pressure
 /// \details
 /// This function retrieves the compensated pressure 
-float ForcedBME280_float::getPressure_float(const bool performMeasurement) {
+float ForcedBME280Float::getPressureAsFloat(const bool performMeasurement) {
   return float(getPressure(performMeasurement) / 100.0);
 }
 
@@ -542,6 +542,6 @@ float ForcedBME280_float::getPressure_float(const bool performMeasurement) {
 /// \details
 /// This function retrieves the compensated humidity as described
 /// on page 50 of the BME280 Datasheet.
-float ForcedBME280_float::getRelativeHumidity_float(const bool performMeasurement) {
+float ForcedBME280Float::getRelativeHumidityAsFloat(const bool performMeasurement) {
   return float(getRelativeHumidity(performMeasurement) / 100.0);
 }

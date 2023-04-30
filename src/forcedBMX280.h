@@ -85,7 +85,7 @@ public:
   int32_t getTemperatureCelsius(const bool performMeasurement = false);
 };
 
-class ForcedBMX280_float : public ForcedBMX280 {
+class ForcedBMX280Float : public ForcedBMX280 {
 protected:
 #ifdef FORCED_BMX280_ATTINY
   USI_TWI& _bus;
@@ -96,12 +96,12 @@ protected:
 
 public:
 #ifdef FORCED_BMX280_ATTINY
-  ForcedBMX280_float(USI_TWI& buss = TinyWireM, const uint8_t address = BMX280_I2C_ADDR);
+  ForcedBMX280Float(USI_TWI& buss = TinyWireM, const uint8_t address = BMX280_I2C_ADDR);
 #else
-  ForcedBMX280_float(TwoWire& bus = Wire, const uint8_t address = BMX280_I2C_ADDR);
+  ForcedBMX280Float(TwoWire& bus = Wire, const uint8_t address = BMX280_I2C_ADDR);
 #endif
 
-  float getTemperatureCelsius_float(const bool performMeasurement = false);
+  float getTemperatureCelsiusAsFloat(const bool performMeasurement = false);
 };
 
 class ForcedBMP280 : public ForcedBMX280 {
@@ -128,7 +128,7 @@ public:
   uint32_t getPressure(const bool performMeasurement = false);
 };
 
-class ForcedBMP280_float : public ForcedBMP280 {
+class ForcedBMP280Float : public ForcedBMP280 {
 protected:
 #ifdef FORCED_BMX280_ATTINY
   USI_TWI& _bus;
@@ -139,13 +139,13 @@ protected:
 
 public:
 #ifdef FORCED_BMX280_ATTINY
-  ForcedBMP280_float(USI_TWI& bus = TinyWireM, const uint8_t address = BMX280_I2C_ADDR);
+  ForcedBMP280Float(USI_TWI& bus = TinyWireM, const uint8_t address = BMX280_I2C_ADDR);
 #else
-  ForcedBMP280_float(TwoWire& bus = Wire, const uint8_t address = BMX280_I2C_ADDR);
+  ForcedBMP280Float(TwoWire& bus = Wire, const uint8_t address = BMX280_I2C_ADDR);
 #endif
 
-  float getTemperatureCelsius_float(const bool performMeasurement = false);
-  float getPressure_float(const bool performMeasurement = false);
+  float getTemperatureCelsiusAsFloat(const bool performMeasurement = false);
+  float getPressureAsFloat(const bool performMeasurement = false);
 };
 
 
@@ -174,7 +174,7 @@ public:
   uint32_t getRelativeHumidity(const bool performMeasurement = false);
 };
 
-class ForcedBME280_float : public ForcedBME280 {
+class ForcedBME280Float : public ForcedBME280 {
 protected:
 #ifdef FORCED_BMX280_ATTINY
   USI_TWI& _bus;
@@ -185,14 +185,14 @@ protected:
 
 public:
 #ifdef FORCED_BMX280_ATTINY
-  ForcedBME280_float(USI_TWI& bus = TinyWireM, const uint8_t address = BMX280_I2C_ADDR);
+  ForcedBME280Float(USI_TWI& bus = TinyWireM, const uint8_t address = BMX280_I2C_ADDR);
 #else
-  ForcedBME280_float(TwoWire& bus = Wire, const uint8_t address = BMX280_I2C_ADDR);
+  ForcedBME280Float(TwoWire& bus = Wire, const uint8_t address = BMX280_I2C_ADDR);
 #endif
 
-  float getTemperatureCelsius_float(const bool performMeasurement = false);
-  float getPressure_float(const bool performMeasurement = false);
-  float getRelativeHumidity_float(const bool performMeasurement = false);
+  float getTemperatureCelsiusAsFloat(const bool performMeasurement = false);
+  float getPressureAsFloat(const bool performMeasurement = false);
+  float getRelativeHumidityAsFloat(const bool performMeasurement = false);
 };
 
 

@@ -28,8 +28,8 @@
 // int32_t g_temperature;  // current temperature - value of 1234 would be 12.34 °C
 
 // // uncomment this block to get temperature as integer and float
-// ForcedBMX280_float climateSensor = ForcedBMX280_float();
-// float g_temperature_float;    // current temperature
+// ForcedBMX280Float climateSensor = ForcedBMX280Float();
+// float g_temperatureFloat;    // current temperature
 
 // uncomment this block to get temperature and pressure as integer
 // ForcedBMP280 climateSensor = ForcedBMP280();
@@ -37,11 +37,11 @@
 // uint32_t g_pressure;    // current pressure
 
 // // uncomment this block to get temperature and pressure as integer and float
-// ForcedBMP280_float climateSensor = ForcedBMP280_float();
+// ForcedBMP280Float climateSensor = ForcedBMP280Float();
 // int32_t g_temperature;        // current temperature
 // uint32_t g_pressure;          // current pressure
-// float g_temperature_float;    // current temperature
-// float g_pressure_float;       // current pressure
+// float g_temperatureFloat;     // current temperature
+// float g_pressureFloat;        // current pressure
 
 // // uncomment this block to get temperature, pressure and humidity as integer
 // ForcedBME280 climateSensor = ForcedBME280();
@@ -50,13 +50,13 @@
 // uint32_t g_humidity;    // current humidity
 
 // uncomment this block to get temperature, pressure and humidity as integer and float
-ForcedBME280_float climateSensor = ForcedBME280_float();
+ForcedBME280Float climateSensor = ForcedBME280Float();
 int32_t g_temperature;  // current temperature
 uint32_t g_pressure;    // current pressure
 uint32_t g_humidity;    // current humidity
-float g_temperature_float;    // current temperature
-float g_pressure_float;       // current pressure
-float g_humidity_float;       // current humidity
+float g_temperatureFloat;    // current temperature
+float g_pressureFloat;       // current pressure
+float g_humidityFloat;       // current humidity
 
 
 // UART control interface
@@ -108,9 +108,9 @@ void loop() {
     // Serial.println(" °C");
 
     // uncomment this block to print temperature - float
-    g_temperature_float = climateSensor.getTemperatureCelsius_float(true);
+    g_temperatureFloat = climateSensor.getTemperatureCelsiusAsFloat(true);
     Serial.print("Temperature: ");
-    Serial.print(g_temperature_float);
+    Serial.print(g_temperatureFloat);
     Serial.println(" °C");
 
     // // uncomment this block to print pressure - uint32_t
@@ -122,9 +122,9 @@ void loop() {
     // Serial.println(" hPa");
 
     // uncomment this block to print pressure - float
-    g_pressure_float = climateSensor.getPressure_float();
+    g_pressureFloat = climateSensor.getPressureAsFloat();
     Serial.print("Pressure: ");
-    Serial.print(g_pressure_float);
+    Serial.print(g_pressureFloat);
     Serial.println(" hPa");
 
     // // uncomment this block to print humidity - uint32_t
@@ -136,9 +136,9 @@ void loop() {
     // Serial.println(" %rh");
 
     // uncomment this block to print humidity - float
-    g_humidity_float = climateSensor.getRelativeHumidity_float();
+    g_humidityFloat = climateSensor.getRelativeHumidityAsFloat();
     Serial.print("Humidity: ");
-    Serial.print(g_humidity_float);
+    Serial.print(g_humidityFloat);
     Serial.println(" %rh");
   }
 }
