@@ -23,6 +23,16 @@
 #include <Wire.h>
 #endif 
 
+#define CHIP_ID_BMP280 (0x58)       // chip ID of BMP280 
+#define CHIP_ID_BME280 (0x60)       // chip ID of BME280 
+#define ERROR_OK (0x00)             // everything is fine
+#define ERROR_BUS (0x01)            // some error with the two-wire bus
+#define ERROR_SENSOR_TYPE (0x02)    // chip-ID doesn't match our expectations
+#define RESET_KEY (0xB6)            // Reset value for reset register
+#define STATUS_IM_UPDATE (0)        // im_update bit in status register
+#define BMX280_I2C_ADDR (0x76)      // standard I2C-Address of sensor 
+#define BMX280_I2C_ALT_ADDR (0x77)  // alternative I2C-Address of sensor
+
 class ForcedBMX280 {
 	private:
 		#ifdef FORCED_BMX280_USE_TINY_WIRE_M
@@ -31,14 +41,21 @@ class ForcedBMX280 {
 		TwoWire & bus;	
 		#endif
 		uint8_t address;
+        uint8_t chipID;
 
+        // calibration data
 		int16_t temperature[4];
 		int16_t pressure[10];
 		int16_t humidity[7];
-		int32_t BMX280t_fine;
+
+        // fine temperature as global variable
+		int32_t BMX280t_fine;   
 
 		int16_t readTwoRegisters();
 		int32_t readFourRegisters();
+        uint8_t read8(uint8_t reg); 
+        uint8_t write8(uint8_t reg, uint8_t value);
+        uint8_t setReg(uint8_t reg);
 
 		void applyOversamplingControls();
 		void readCalibrationData();
@@ -46,23 +63,27 @@ class ForcedBMX280 {
 		enum class registers {
 			CTRL_HUM = 0xF2,
 			CTRL_MEAS = 0xF4,
-			FIRST_CALIB = 0x88,
-			SCND_CALIB = 0xE1,
+			FIRST_CALIB = 0x88, // temperature and pressure calibration data
+            FIRST_HUM_CALIB = 0xA1, // first byte of humidity calibration data
+			SCND_HUM_CALIB = 0xE1,  // second part of humidity calibration data
 			TEMP_MSB = 0xFA,
 			HUM_MSB = 0xFD,
 			PRESS_MSB = 0xF7,
-			STATUS = 0xF3
+			STATUS = 0xF3,
+            CHIPID = 0xD0,      // Chip ID register
+            RESET = 0xE0        // Reset register
 		};
 
 	public:
 		#ifdef FORCED_BMX280_USE_TINY_WIRE_M
-		ForcedBMX280(USI_TWI & bus = TinyWireM, const uint8_t address = 0x76);
+		ForcedBMX280(USI_TWI & bus = TinyWireM, const uint8_t address = BMX280_I2C_ADDR);
 		#else
-		ForcedBMX280(TwoWire & bus = Wire, const uint8_t address = 0x76);	
+		ForcedBMX280(TwoWire & bus = Wire, const uint8_t address = BMX280_I2C_ADDR);	
 		#endif
 
-		bool begin();
-		bool takeForcedMeasurement();
+		uint8_t begin();
+		uint8_t takeForcedMeasurement();
+        uint8_t getChipID();
 
 		#ifdef FORCED_BMX280_USE_INTEGER_RESULTS
 		int32_t getTemperatureCelsius(const bool performMeasurement = false);
@@ -81,7 +102,6 @@ class ForcedBMX280 {
 		#else
 		float getRelativeHumidity(const bool performMeasurement = false);
 		#endif
-
 };
 
 

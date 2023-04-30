@@ -19,14 +19,10 @@ There has been given an example that can be obtained from below or from within t
 #include <forcedBMX280.h>
 
 // Create an instance of a BMX280. The parameters I2C bus and I2C address are optional. For example:
-// if a BMP280 is connected or you don't care about humidity:
-// - ForcedBMX280 climateSensor = ForcedBMP280(Wire, 0x76);
-// - ForcedBMX280 climateSensor = ForcedBMP280(TinyWireM, 0x77);
+// - ForcedBMX280 climateSensor = ForcedBMX280(Wire, BMX280_I2C_ADDR);
+// - ForcedBMX280 climateSensor = ForcedBMX280(TinyWireM, 0x77);
 
-// if a BME280 is connected; will allow humidity measurement
-// - ForcedBMX280 climateSensor = ForcedBME280(Wire, 0x76);
-
-ForcedBMX280 climateSensor = ForcedBME280(); 
+ForcedBMX280 climateSensor = ForcedBMX280(); 
 
 void setup(){
 	Serial.begin(9600);
@@ -43,7 +39,7 @@ void loop(){
 	Serial.print("Temperature: ");
 	Serial.print(climateSensor.getTemperatureCelsius());
 	Serial.print(", Humidity: ");
-	Serial.print(climateSensor.getRelativeHumidity());
+	Serial.print(climateSensor.getRelativeHumidity());		// will give 0, when no BME280 is connected
 	Serial.print(" and Pressure: ");
 	Serial.print(climateSensor.getPressure());
 	Serial.println();

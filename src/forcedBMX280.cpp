@@ -32,6 +32,41 @@ int32_t ForcedBMX280::readFourRegisters () {
 }
 
 /// \brief
+/// Read 8 bits
+/// \details
+/// This function reads 8 bits from the register (reg) via I2C bus.
+uint8_t ForcedBMX280::read8(uint8_t reg) {
+    bus.beginTransmission(address);
+    bus.write(reg);
+    bus.endTransmission();
+    bus.requestFrom(address, (byte)1);
+    return bus.read();
+}
+
+/// \brief
+/// Write 8 bits 
+/// \details
+/// This function writes 8 bits (value) to the device into to register (reg).
+/// Returns an error code if there was one from the bus
+uint8_t ForcedBMX280::write8(uint8_t reg, uint8_t value) {
+    bus.beginTransmission(address);
+    bus.write(reg);
+    bus.write(value);
+    if(bus.endTransmission()) return ERROR_BUS;
+}
+
+/// \brief
+/// Set register
+/// \details
+/// This function selects a register (reg) of the sensor.
+/// Returns an error code if there was one from the bus
+uint8_t ForcedBMX280::setReg(uint8_t reg) {
+    bus.beginTransmission(address);
+    bus.write(reg);
+    if(bus.endTransmission()) return ERROR_BUS;
+}
+
+/// \brief
 /// Constructor
 /// \details
 /// This creates a ForcedBMX280 object from the mandatory TwoWire-bus
@@ -44,30 +79,59 @@ ForcedBMX280::ForcedBMX280(TwoWire & bus, const uint8_t address):
     bus(bus),
     address(address)
 {
-    if(autoBegin){
-        bus.begin();
-        delay(2);
-        applyOversamplingControls();
-        readCalibrationData();
-    }
+    
 }
 
 /// \brief
-/// Begin
+/// begin
 /// \details
 /// This applies the set Oversampling Controls and reads the calibration
 /// data from the register. This function has been implementted to comply
 /// with the Arduino 1.5 Format; it's also called from the constructor (as it should be).
-/// Returns the error code of bus if there was one
+/// Returns an error code if there was one from the bus the chipID is not matching BME280 or BMP280
 uint8_t ForcedBMX280::begin(){
-    uint8_t errorCode = 0;
-    bus.begin();    
-    bus.beginTransmission(address);
-    if(errorCode = bus.endTransmission()) return errorCode;
-    if(errorCode = applyOversamplingControls()) return errorCode;
-    if(errorCode = readCalibrationData()) return errorCode;
+    bus.begin();   
 
-    return errorCode;
+    // Check that something is attached to the bus at the given address 
+    bus.beginTransmission(address);
+    if(bus.endTransmission()) return ERROR_BUS;
+
+    // Read chip ID
+    chipID = read8(BME280_REG_CHIPID);
+
+    // Check sensor ID BMP280 or BME280
+    if ((chipID != CHIP_ID_BMP280) && ((chipID != CHIP_ID_BME280))) {
+        // BMP280 / BME280 not found
+        return ERROR_SENSOR_TYPE;
+    }
+
+    // Generate soft-reset
+    if(write8((uint8_t)registers::RESET, (uint8_t)RESET_KEY)) return ERROR_BUS;
+
+    // Wait for copy completion NVM data to image registers
+    delay(10);
+    while ((read8((uint8_t)registers::STATUS) & (_BV(STATUS_IM_UPDATE)))) {
+        delay(10);
+    }
+
+    // set mode of sensor
+    if(applyOversamplingControls()) return ERROR_BUS;
+
+    // read factory trimming parameters
+    if(readCalibrationData()) return ERROR_BUS;
+
+    return ERROR_OK;
+}
+
+
+/// \brief
+/// getChipID
+/// \details
+/// Chip ID as read with begin()
+uint8_t ForcedBMX280::getChipID()
+{
+    // Return chip ID
+    return chipID;
 }
 
 /// \brief
@@ -76,12 +140,15 @@ uint8_t ForcedBMX280::begin(){
 /// This function takes a forced measurement. That is, the BME280 is woken up to take
 /// a measurement after which it goes back to sleep. During this sleep, it consumes
 /// 0.25uA!
-/// Returns the error code of bus if there was one
+/// Returns an error code if there was one from the bus
 uint8_t ForcedBMX280::takeForcedMeasurement(){
-    bus.beginTransmission(address);
-    bus.write((uint8_t)registers::CTRL_MEAS);
-    bus.write(0b00100101);
-    return bus.endTransmission();
+
+    // ctrl_meas - see datasheet section 5.4.5  
+    // forced mode: ctrl_meas[0..1] 0b01 (0b11 for normal and 0b00 for sleep mode)  
+    // pressure oversampling x 1: ctrl_meas[4..2] 0b001  
+    // temperature oversampling x 1: ctrl_meas[7..5] 0b001  
+    if(write8((uint8_t)registers::CTRL_MEAS, 0b00100101)) return ERROR_BUS;
+    return ERROR_OK;
 }
 
 /// \brief
@@ -89,15 +156,25 @@ uint8_t ForcedBMX280::takeForcedMeasurement(){
 /// \details
 /// This function sets the sampling controls to values that are
 /// suitable for all kinds of applications.
-/// Returns the error code of bus if there was one
+/// Returns an error code if there was one from the bus
 uint8_t ForcedBMX280::applyOversamplingControls(){
-    bus.beginTransmission(address);
-    bus.write((uint8_t)registers::CTRL_HUM);
-    bus.write(0b00000001);
-    bus.write((uint8_t)registers::CTRL_MEAS);
-    bus.write(0b00100101);                          // Last two bits are 01 for forced, 11 for normal and 00 for sleep mode
-    bus.write((uint8_t)registers::FIRST_CALIB);
-    return bus.endTransmission();
+
+    // Set in sleep mode to provide write access to the “config” register
+    if(write8((uint8_t)registers::CTRL_MEAS, 0)) return ERROR_BUS;
+
+    // humidity oversampling - see datasheet section 5.4.3
+    // oversampling x 1: 0x01
+    // only to be set when a BME280 is used
+    if(chipID == CHIP_ID_BME280) {
+        if(write8((uint8_t)registers::CTRL_HUM, 0b00000001)) return ERROR_BUS;
+    }
+
+    // ctrl_meas - see datasheet section 5.4.5  
+    // forced mode: ctrl_meas[0..1] 0b01 (0b11 for normal and 0b00 for sleep mode)  
+    // pressure oversampling x 1: ctrl_meas[4..2] 0b001  
+    // temperature oversampling x 1: ctrl_meas[7..5] 0b001  
+    if(write8((uint8_t)registers::CTRL_MEAS, 0b00100101)) return ERROR_BUS;
+    return ERROR_OK;
 }
 
 /// \brief
@@ -106,26 +183,36 @@ uint8_t ForcedBMX280::applyOversamplingControls(){
 /// This functions reads the calibration data after which it is
 /// stored in the temperature, pressure and humidity arrays for
 /// later use in compensation.
-/// Returns the error code of bus if there was one
+/// Returns an error code if there was one from the bus
 uint8_t ForcedBMX280::readCalibrationData(){
-    uint8_t errorCode = 0;
-    bus.requestFrom(address, (uint8_t)26);
+    if(setReg((uint8_t)registers::FIRST_CALIB)) return ERROR_BUS;
+    bus.requestFrom(address, (uint8_t)24);
+    // read 24 bytes for temperature and pressure calibration data
     for (int i=1; i<=3; i++) temperature[i] = readTwoRegisters();           // Temperature
     for (int i=1; i<=9; i++) pressure[i] = readTwoRegisters();              // Pressure
-    bus.read();                                                             // Skip 0xA0
-    humidity[1] = (uint8_t)bus.read();                                      // Humidity
-    bus.beginTransmission(address);
-    bus.write((uint8_t)registers::SCND_CALIB);
-    if(errorCode = bus.endTransmission()) return errorCode;
-    bus.requestFrom(address, (uint8_t)7);
-    humidity[2] = readTwoRegisters();
-    humidity[3] = (uint8_t)bus.read();
-    uint8_t e4 = bus.read(); uint8_t e5 = bus.read();
-    humidity[4] = ((int16_t)((e4 << 4) + (e5 & 0x0F)));
-    humidity[5] = ((int16_t)((bus.read() << 4) + ((e5 >> 4) & 0x0F)));
-    humidity[6] = ((int8_t)bus.read());
+
+    // read humidity calibration data in case its a BME280
+    if(chipID == CHIP_ID_BME280) {
+        // read 1. byte of humidity calibration data
+        humidity[1] = read8(FIRST_HUM_CALIB);
+
+        // read second part of humidity calibration data
+        if(setReg((uint8_t)registers::SCND_HUM_CALIB)) return ERROR_BUS;
+        bus.requestFrom(address, (uint8_t)7);
+        humidity[2] = readTwoRegisters();
+        humidity[3] = (uint8_t)bus.read();
+        uint8_t e4 = bus.read(); uint8_t e5 = bus.read();
+        humidity[4] = ((int16_t)((e4 << 4) + (e5 & 0x0F)));
+        humidity[5] = ((int16_t)((bus.read() << 4) + ((e5 >> 4) & 0x0F)));
+        humidity[6] = ((int8_t)bus.read());
+    }
+
+    // get temperature reading to initialize BMX280t_fine
+    if(takeForcedMeasurement()) return ERROR_BUS;
     getTemperatureCelsius();
-    return err;
+
+    // done
+    return ERROR_OK;
 }
 
 /// \brief
@@ -214,11 +301,14 @@ float ForcedBMX280::getPressure(const bool performMeasurement)
 /// This function retrieves the compensated humidity as described
 /// on page 50 of the BME280 Datasheet.
 #ifdef FORCED_BMX280_USE_INTEGER_RESULTS
-uint32_t ForcedBME280::getRelativeHumidity(const bool performMeasurement)
+uint32_t ForcedBMX280::getRelativeHumidity(const bool performMeasurement)
 #else
-float ForcedBME280::getRelativeHumidity(const bool performMeasurement)
+float ForcedBMX280::getRelativeHumidity(const bool performMeasurement)
 #endif
 {
+    // silently bail out if it is the wrong type of sensor
+    if(chipID != CHIP_ID_BME280) return 0;
+
     bus.beginTransmission(address);
     if(performMeasurement){
         bus.write((uint8_t)registers::CTRL_MEAS);
