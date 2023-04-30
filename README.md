@@ -5,15 +5,15 @@ That was the main goal of this entire library.
 I needed only a temperature sensor and had a BMP280 lying around. So I modified this great library to support this sensor as well. Also, I included some checks to ensure that the sensor is connected. (...and fixed the typo in Celcius being nitpicky). I created several classes to support only the aquisitions and data format needed: 
 * ForcedBMX280
   * Minimal version supporting only temperature aquisition in integer format
-* ForcedBMX280_float
+* ForcedBMX280Float
   * Supporting temperature aquisition in integer and float format
 * ForcedBMP280
   * Supporting temperature and pressure aquisition in integer format
-* ForcedBMP280_float
+* ForcedBMP280Float
   * Supporting temperature and pressure aquisition in integer and float format
 * ForcedBME280
   * Supporting temperature, pressure and humidity aquisition in integer format
-* ForcedBME280_float
+* ForcedBME280Float
   * Supporting temperature, pressure and humidity aquisition in integer and float format
 
 > See the full example on how to use the different classes.
@@ -63,23 +63,25 @@ on the appropriate instance in the _setup()_; _TinyWireM.begin()_ or _Wire.begin
 #### uint8_t begin() 
 This function initializes the library. Call before use...  
 The funcion will return an error if the sensor is unavailable:
-* ERROR_BUS (0x01) - Some error with the two-wire bus.
-* ERROR_SENSOR_TYPE (0x02) - Chip-ID doesn't match our expectations. Needs to be 0x58 for BMP280 and 0x60 for BME280.
+* ERROR_BUS (0x01) - Some error with the two-wire bus
+* ERROR_SENSOR_TYPE (0x02) - Chip-ID doesn't match our expectations. Needs to be 0x58 for BMP280 and 0x60 for BME280
+* or 0 if everything went well.
 #### uint8_t takeForcedMeasurement() 
 This function takes a forced measurement which means getTemperatureCelcius(), getPressure() (and getRelativeHumidity() if a BME280 is connected) use the updated values. Useful in case all functions are all called at the same time.  
 The funcion will return an error if the sensor is unavailable:
-* ERROR_BUS (0x01) - Some error with the two-wire bus.
+* ERROR_BUS (0x01) - Some error with the two-wire bus
+* or 0 if everything went well.
 #### int32_t getTemperatureCelsius(const bool performMeasurement) 
 This function can be used to retrieve the temperature. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getTemperatureCelcius() function is called.
-#### float getTemperatureCelsius_float(const bool performMeasurement) 
+#### float getTemperatureCelsiusAsFloat(const bool performMeasurement) 
 See above, but using float for the result. 
 #### uint32_t getPressure(const bool performMeasurement) 
 This function can be used to retrieve the pressure. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getPressure() function is called.
-#### float getPressure_float(const bool performMeasurement) 
+#### float getPressureAsFloat(const bool performMeasurement) 
 See above, but using float for the result. 
 #### uint32_t getRelativeHumidity(const bool performMeasurement) - only when BME280 is connected
 This function can be used to retrieve the humidity. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getRelativeHumidity() function is called.
-#### float getRelativeHumidity_float(const bool performMeasurement) - only when BME280 is connected
+#### float getRelativeHumidityAsFloat(const bool performMeasurement) - only when BME280 is connected
 See above, but using float for the result. 
 
 
