@@ -32,23 +32,24 @@
 #define BMX280_I2C_ADDR (0x76)      // standard I2C-Address of sensor 
 #define BMX280_I2C_ALT_ADDR (0x77)  // alternative I2C-Address of sensor
 
+
 class ForcedBMX280 {
 	private:
 		#ifdef FORCED_BMX280_USE_TINY_WIRE_M
-		USI_TWI & bus;
+		USI_TWI & _bus;
 		#else
-		TwoWire & bus;	
+		TwoWire & _bus;	
 		#endif
-		uint8_t address;
-        uint8_t chipID;
+		uint8_t _address;
+        uint8_t _chipID;
 
         // calibration data
-		int16_t temperature[4];
-		int16_t pressure[10];
-		int16_t humidity[7];
+		int16_t _temperature[4];
+		int16_t _pressure[10];
+		int16_t _humidity[7];
 
         // fine temperature as global variable
-		int32_t BMX280t_fine;   
+		int32_t _BMX280t_fine;   
 
 		int16_t readTwoRegisters();
 		int32_t readFourRegisters();

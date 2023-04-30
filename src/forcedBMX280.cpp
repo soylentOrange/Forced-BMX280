@@ -15,8 +15,8 @@
 /// \details
 /// This function reads 16 bits from the I2C bus.
 int16_t ForcedBMX280::readTwoRegisters () {
-    uint8_t lo = bus.read();
-    uint8_t hi = bus.read();
+    uint8_t lo = _bus.read();
+    uint8_t hi = _bus.read();
     return hi << 8 | lo;
 }
 
@@ -25,9 +25,9 @@ int16_t ForcedBMX280::readTwoRegisters () {
 /// \details
 /// This function reads 32 bits from the I2C bus.
 int32_t ForcedBMX280::readFourRegisters () {
-    uint8_t msb = bus.read();
-    uint8_t lsb = bus.read();
-    uint8_t xlsb = bus.read();
+    uint8_t msb = _bus.read();
+    uint8_t lsb = _bus.read();
+    uint8_t xlsb = _bus.read();
     return (uint32_t)msb << 12 | (uint32_t)lsb << 4 | (xlsb >> 4 & 0x0F);
 }
 
@@ -36,11 +36,11 @@ int32_t ForcedBMX280::readFourRegisters () {
 /// \details
 /// This function reads 8 bits from the register (reg) via I2C bus.
 uint8_t ForcedBMX280::read8(uint8_t reg) {
-    bus.beginTransmission(address);
-    bus.write(reg);
-    bus.endTransmission();
-    bus.requestFrom(address, (byte)1);
-    return bus.read();
+    _bus.beginTransmission(_address);
+    _bus.write(reg);
+    _bus.endTransmission();
+    _bus.requestFrom(_address, (byte)1);
+    return _bus.read();
 }
 
 /// \brief
@@ -49,10 +49,10 @@ uint8_t ForcedBMX280::read8(uint8_t reg) {
 /// This function writes 8 bits (value) to the device into to register (reg).
 /// Returns an error code if there was one from the bus
 uint8_t ForcedBMX280::write8(uint8_t reg, uint8_t value) {
-    bus.beginTransmission(address);
-    bus.write(reg);
-    bus.write(value);
-    if(bus.endTransmission()) return ERROR_BUS;
+    _bus.beginTransmission(_address);
+    _bus.write(reg);
+    _bus.write(value);
+    if(_bus.endTransmission()) return ERROR_BUS;
 }
 
 /// \brief
@@ -61,9 +61,9 @@ uint8_t ForcedBMX280::write8(uint8_t reg, uint8_t value) {
 /// This function selects a register (reg) of the sensor.
 /// Returns an error code if there was one from the bus
 uint8_t ForcedBMX280::setReg(uint8_t reg) {
-    bus.beginTransmission(address);
-    bus.write(reg);
-    if(bus.endTransmission()) return ERROR_BUS;
+    _bus.beginTransmission(_address);
+    _bus.write(reg);
+    if(_bus.endTransmission()) return ERROR_BUS;
 }
 
 /// \brief
@@ -76,11 +76,9 @@ ForcedBMX280::ForcedBMX280(USI_TWI & bus, const uint8_t address):
 #else
 ForcedBMX280::ForcedBMX280(TwoWire & bus, const uint8_t address):   
 #endif
-    bus(bus),
-    address(address)
-{
-    
-}
+    _bus(bus),
+    _address(address) 
+    {}
 
 /// \brief
 /// begin
@@ -90,17 +88,17 @@ ForcedBMX280::ForcedBMX280(TwoWire & bus, const uint8_t address):
 /// with the Arduino 1.5 Format; it's also called from the constructor (as it should be).
 /// Returns an error code if there was one from the bus the chipID is not matching BME280 or BMP280
 uint8_t ForcedBMX280::begin(){
-    bus.begin();   
+    _bus.begin();   
 
     // Check that something is attached to the bus at the given address 
-    bus.beginTransmission(address);
-    if(bus.endTransmission()) return ERROR_BUS;
+    _bus.beginTransmission(_address);
+    if(_bus.endTransmission()) return ERROR_BUS;
 
     // Read chip ID
-    chipID = read8(BME280_REG_CHIPID);
+    _chipID = read8(BME280_REG_CHIPID);
 
     // Check sensor ID BMP280 or BME280
-    if ((chipID != CHIP_ID_BMP280) && ((chipID != CHIP_ID_BME280))) {
+    if ((_chipID != CHIP_ID_BMP280) && ((_chipID != CHIP_ID_BME280))) {
         // BMP280 / BME280 not found
         return ERROR_SENSOR_TYPE;
     }
@@ -131,7 +129,7 @@ uint8_t ForcedBMX280::begin(){
 uint8_t ForcedBMX280::getChipID()
 {
     // Return chip ID
-    return chipID;
+    return _chipID;
 }
 
 /// \brief
@@ -165,7 +163,7 @@ uint8_t ForcedBMX280::applyOversamplingControls(){
     // humidity oversampling - see datasheet section 5.4.3
     // oversampling x 1: 0x01
     // only to be set when a BME280 is used
-    if(chipID == CHIP_ID_BME280) {
+    if(_chipID == CHIP_ID_BME280) {
         if(write8((uint8_t)registers::CTRL_HUM, 0b00000001)) return ERROR_BUS;
     }
 
@@ -186,25 +184,25 @@ uint8_t ForcedBMX280::applyOversamplingControls(){
 /// Returns an error code if there was one from the bus
 uint8_t ForcedBMX280::readCalibrationData(){
     if(setReg((uint8_t)registers::FIRST_CALIB)) return ERROR_BUS;
-    bus.requestFrom(address, (uint8_t)24);
+    _bus.requestFrom(_address, (uint8_t)24);
     // read 24 bytes for temperature and pressure calibration data
-    for (int i=1; i<=3; i++) temperature[i] = readTwoRegisters();           // Temperature
-    for (int i=1; i<=9; i++) pressure[i] = readTwoRegisters();              // Pressure
+    for (int i=1; i<=3; i++) _temperature[i] = readTwoRegisters();           // Temperature
+    for (int i=1; i<=9; i++) _pressure[i] = readTwoRegisters();              // Pressure
 
     // read humidity calibration data in case its a BME280
-    if(chipID == CHIP_ID_BME280) {
+    if(_chipID == CHIP_ID_BME280) {
         // read 1. byte of humidity calibration data
-        humidity[1] = read8(FIRST_HUM_CALIB);
+        _humidity[1] = read8(FIRST_HUM_CALIB);
 
         // read second part of humidity calibration data
         if(setReg((uint8_t)registers::SCND_HUM_CALIB)) return ERROR_BUS;
-        bus.requestFrom(address, (uint8_t)7);
-        humidity[2] = readTwoRegisters();
-        humidity[3] = (uint8_t)bus.read();
-        uint8_t e4 = bus.read(); uint8_t e5 = bus.read();
-        humidity[4] = ((int16_t)((e4 << 4) + (e5 & 0x0F)));
-        humidity[5] = ((int16_t)((bus.read() << 4) + ((e5 >> 4) & 0x0F)));
-        humidity[6] = ((int8_t)bus.read());
+        _bus.requestFrom(_address, (uint8_t)7);
+        _humidity[2] = readTwoRegisters();
+        _humidity[3] = (uint8_t)_bus.read();
+        uint8_t e4 = _bus.read(); uint8_t e5 = _bus.read();
+        _humidity[4] = ((int16_t)((e4 << 4) + (e5 & 0x0F)));
+        _humidity[5] = ((int16_t)((_bus.read() << 4) + ((e5 >> 4) & 0x0F)));
+        _humidity[6] = ((int8_t)_bus.read());
     }
 
     // get temperature reading to initialize BMX280t_fine
@@ -226,20 +224,20 @@ int32_t ForcedBMX280::getTemperatureCelsius(const bool performMeasurement)
 float ForcedBMX280::getTemperatureCelsius(const bool performMeasurement)
 #endif
 {
-    bus.beginTransmission(address);
+    _bus.beginTransmission(_address);
     if(performMeasurement){
-        bus.write((uint8_t)registers::CTRL_MEAS);
-        bus.write(0b00100101);
+        _bus.write((uint8_t)registers::CTRL_MEAS);
+        _bus.write(0b00100101);
     }
-    bus.write((uint8_t)registers::TEMP_MSB);
-    bus.endTransmission();
-    bus.requestFrom(address, (uint8_t)3);
+    _bus.write((uint8_t)registers::TEMP_MSB);
+    _bus.endTransmission();
+    _bus.requestFrom(_address, (uint8_t)3);
     int32_t adc = readFourRegisters();
-    int32_t var1 = ((((adc>>3) - ((int32_t)((uint16_t)temperature[1])<<1))) * ((int32_t)temperature[2])) >> 11;
-    int32_t var2 = ((((adc>>4) - ((int32_t)((uint16_t)temperature[1]))) * ((adc>>4) - ((int32_t)((uint16_t)temperature[1])))) >> 12);
-    var2 = (var2 * ((int32_t)temperature[3])) >> 14;
-    BMX280t_fine = var1 + var2;
-    int32_t temperature = (BMX280t_fine*5+128)>>8;
+    int32_t var1 = ((((adc>>3) - ((int32_t)((uint16_t)_temperature[1])<<1))) * ((int32_t)_temperature[2])) >> 11;
+    int32_t var2 = ((((adc>>4) - ((int32_t)((uint16_t)_temperature[1]))) * ((adc>>4) - ((int32_t)((uint16_t)_temperature[1])))) >> 12);
+    var2 = (var2 * ((int32_t)_temperature[3])) >> 14;
+    _BMX280t_fine = var1 + var2;
+    int32_t temperature = (_BMX280t_fine*5+128)>>8;
     #ifdef FORCED_BMX280_USE_INTEGER_RESULTS
     return temperature;
     #else
@@ -258,22 +256,22 @@ uint32_t ForcedBMX280::getPressure(const bool performMeasurement)
 float ForcedBMX280::getPressure(const bool performMeasurement)
 #endif
 {
-    bus.beginTransmission(address);
+    _bus.beginTransmission(_address);
     if(performMeasurement){
-        bus.write((uint8_t)registers::CTRL_MEAS);
-        bus.write(0b00100101);
+        _bus.write((uint8_t)registers::CTRL_MEAS);
+        _bus.write(0b00100101);
     }
-    bus.write((uint8_t)registers::PRESS_MSB);
-    bus.endTransmission();
-    bus.requestFrom(address, (uint8_t)3);
+    _bus.write((uint8_t)registers::PRESS_MSB);
+    _bus.endTransmission();
+    _bus.requestFrom(_address, (uint8_t)3);
 
     int32_t adc = readFourRegisters();
-    int32_t var1 = (((int32_t)BMX280t_fine)>>1) - (int32_t)64000;
-    int32_t var2 = (((var1>>2) * (var1>>2)) >> 11 ) * ((int32_t)pressure[6]);
-    var2 = var2 + ((var1*((int32_t)pressure[5]))<<1);
-    var2 = (var2>>2) + (((int32_t)pressure[4])<<16);
-    var1 = (((pressure[3] * (((var1>>2) * (var1>>2)) >> 13 )) >> 3) + ((((int32_t)pressure[2]) * var1)>>1))>>18;
-    var1 = ((((32768+var1))*((int32_t)((uint16_t)pressure[1])))>>15);
+    int32_t var1 = (((int32_t)_BMX280t_fine)>>1) - (int32_t)64000;
+    int32_t var2 = (((var1>>2) * (var1>>2)) >> 11 ) * ((int32_t)_pressure[6]);
+    var2 = var2 + ((var1*((int32_t)_pressure[5]))<<1);
+    var2 = (var2>>2) + (((int32_t)_pressure[4])<<16);
+    var1 = (((_pressure[3] * (((var1>>2) * (var1>>2)) >> 13 )) >> 3) + ((((int32_t)_pressure[2]) * var1)>>1))>>18;
+    var1 = ((((32768+var1))*((int32_t)((uint16_t)_pressure[1])))>>15);
 
     if (var1 == 0){
         return 0;
@@ -285,9 +283,9 @@ float ForcedBMX280::getPressure(const bool performMeasurement)
         p = (p / (uint32_t)var1) * 2;
     }
 
-    var1 = (((int32_t)pressure[9]) * ((int32_t)(((p>>3) * (p>>3))>>13)))>>12;
-    var2 = (((int32_t)(p>>2)) * ((int32_t)pressure[8]))>>13;
-    p = (uint32_t)((int32_t)p + ((var1 + var2 + pressure[7]) >> 4));
+    var1 = (((int32_t)_pressure[9]) * ((int32_t)(((p>>3) * (p>>3))>>13)))>>12;
+    var2 = (((int32_t)(p>>2)) * ((int32_t)_pressure[8]))>>13;
+    p = (uint32_t)((int32_t)p + ((var1 + var2 + _pressure[7]) >> 4));
     #ifdef FORCED_BMX280_USE_INTEGER_RESULTS
     return p;
     #else
@@ -307,25 +305,25 @@ float ForcedBMX280::getRelativeHumidity(const bool performMeasurement)
 #endif
 {
     // silently bail out if it is the wrong type of sensor
-    if(chipID != CHIP_ID_BME280) return 0;
+    if(_chipID != CHIP_ID_BME280) return 0;
 
-    bus.beginTransmission(address);
+    _bus.beginTransmission(_address);
     if(performMeasurement){
-        bus.write((uint8_t)registers::CTRL_MEAS);
-        bus.write(0b00100101);
+        _bus.write((uint8_t)registers::CTRL_MEAS);
+        _bus.write(0b00100101);
     }
-    bus.write((uint8_t)registers::HUM_MSB);
-    bus.endTransmission();
-    bus.requestFrom(address, (uint8_t)2);
-    uint8_t hi = bus.read(); uint8_t lo = bus.read();
+    _bus.write((uint8_t)registers::HUM_MSB);
+    _bus.endTransmission();
+    _bus.requestFrom(_address, (uint8_t)2);
+    uint8_t hi = _bus.read(); uint8_t lo = _bus.read();
     int32_t adc = (uint16_t)(hi<<8 | lo);
     int32_t var1;
-    var1 = (BMX280t_fine - ((int32_t)76800));
-    var1 = (((((adc << 14) - (((int32_t)humidity[4]) << 20) - (((int32_t)humidity[5]) * var1)) +
-              ((int32_t)16384)) >> 15) * (((((((var1 * ((int32_t)humidity[6])) >> 10) * (((var1 *
-                                                                                           ((int32_t)humidity[3])) >> 11) + ((int32_t)32768))) >> 10) + ((int32_t)2097152)) *
-                                           ((int32_t)humidity[2]) + 8192) >> 14));
-    var1 = (var1 - (((((var1 >> 15) * (var1 >> 15)) >> 7) * ((int32_t)humidity[1])) >> 4));
+    var1 = (_BMX280t_fine - ((int32_t)76800));
+    var1 = (((((adc << 14) - (((int32_t)_humidity[4]) << 20) - (((int32_t)_humidity[5]) * var1)) +
+              ((int32_t)16384)) >> 15) * (((((((var1 * ((int32_t)_humidity[6])) >> 10) * (((var1 *
+                                                                                           ((int32_t)_humidity[3])) >> 11) + ((int32_t)32768))) >> 10) + ((int32_t)2097152)) *
+                                           ((int32_t)_humidity[2]) + 8192) >> 14));
+    var1 = (var1 - (((((var1 >> 15) * (var1 >> 15)) >> 7) * ((int32_t)_humidity[1])) >> 4));
     var1 = (var1 < 0 ? 0 : var1);
     var1 = (var1 > 419430400 ? 419430400 : var1);
     uint32_t humidity = (uint32_t)((var1>>12)*25)>>8;
