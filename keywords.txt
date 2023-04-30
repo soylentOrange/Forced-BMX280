@@ -1,4 +1,4 @@
-# Syntax Coloring Map For Forced-BME280 Library In Arduino IDE
+# Syntax Coloring Map For Forced-BMX280 Library In Arduino IDE
 
 begin					KEYWORD2
 takeForcedMeasurement	KEYWORD2
