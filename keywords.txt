@@ -1,7 +1,9 @@
 # Syntax Coloring Map For Forced-BMX280 Library In Arduino IDE
 
-begin					KEYWORD2
+ForcedBMX280 KEYWORD1
+begin KEYWORD2
 takeForcedMeasurement	KEYWORD2
-getTemperatureCelcius	KEYWORD2
-getRelativeHumidity		KEYWORD2
-getPressure				KEYWORD2
+getTemperatureCelsius	KEYWORD2
+getRelativeHumidity KEYWORD2
+getPressure KEYWORD2
+getChipID KEYWORD2
