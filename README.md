@@ -1,8 +1,10 @@
-# Forced-BME280
-There isn't a large amount of small, efficient and easy to use libraries for the BME280; that's what I found out when I needed one.
+# Forced-BMX280
+There isn't a large amount of small, efficient and easy to use libraries for the BME280; that's what [JVKran](https://github.com/JVKran/Forced-BME280) found out.
 That's the main goal of this entire library.
 
-The name of this respository stands for the mode in which the BME280 is used. In forced mode the chip sleeps and gets waked up if data is requested. During measurements it peeks up to normal current consumption. However, when not in use, the chip only uses 0.25uA! Great for battery powered ATtiny's ;).
+I needed only a temperature sensor and had a BMP280 lying around. So I modified this great library to support this sensor as well. Also, I included some checks to ensure that the sensor is connected. (...and fixed the typo in Celcius being nitpicky)
+
+The name of this respository stands for the mode in which the sensor is used. In forced mode the chip sleeps and gets waked up if data is requested. During measurements it peeks up to normal current consumption. However, when not in use, the chip only uses 0.25uA! Great for battery powered ATtiny's ;).
 
 ## Advantages of this library
 - Ultra low power. In sleep mode the BME280 only uses 0.25uA!
@@ -12,25 +14,34 @@ The name of this respository stands for the mode in which the BME280 is used. In
 
 
 ## Example
-There has been given an example that can be obtained from below or from within the Arduino IDE in Examples->Forced-BME280->Test.
+There has been given an example that can be obtained from below or from within the Arduino IDE in Examples->Forced-BMX280->Test.
 ```c++
-#include <forcedClimate.h>
+#include <forcedBMX280.h>
 
-// Create an instance of a BME280. The parameters I2C bus and I2C address are optional. For example:
-// - ForcedClimate climateSensor = ForcedClimate(Wire, 0x76);
-// - ForcedClimate climateSensor = ForcedClimate(TinyWireM, 0x77);
-ForcedClimate climateSensor = ForcedClimate();
+// Create an instance of a BMX280. The parameters I2C bus and I2C address are optional. For example:
+// if a BMP280 is connected or you don't care about humidity:
+// - ForcedBMX280 climateSensor = ForcedBMP280(Wire, 0x76);
+// - ForcedBMX280 climateSensor = ForcedBMP280(TinyWireM, 0x77);
+
+// if a BME280 is connected; will allow humidity measurement
+// - ForcedBMX280 climateSensor = ForcedBME280(Wire, 0x76);
+
+ForcedBMX280 climateSensor = ForcedBME280(); 
 
 void setup(){
 	Serial.begin(9600);
 	Wire.begin(); 				// Or "TinyWireM.begin()" when using an ATtiny.
-	climateSensor.begin();
+	
+	// you might want to check if the sensor is available when "starting it up"
+	while(climateSensor.begin()) {
+	  delay(100);
+	} 
 }
 
 void loop(){
 	climateSensor.takeForcedMeasurement();
 	Serial.print("Temperature: ");
-	Serial.print(climateSensor.getTemperatureCelcius());
+	Serial.print(climateSensor.getTemperatureCelsius());
 	Serial.print(", Humidity: ");
 	Serial.print(climateSensor.getRelativeHumidity());
 	Serial.print(" and Pressure: ");
@@ -38,7 +49,7 @@ void loop(){
 	Serial.println();
 	delay(1000);
 	// Perform measurement integrated getTemperature(); useful for when only one value has to be used.
-	Serial.print(climateSensor.getTemperatureCelcius(true));
+	Serial.print(climateSensor.getTemperatureCelsius(true));
 	Serial.println();
 	delay(5000);
 }
@@ -49,13 +60,13 @@ on the appropriate instance in the _setup()_; _TinyWireM.begin()_ or _Wire.begin
 
 ## Functions
 #### takeForcedMeasurement() 
-This function takes a forced measurement which means getTemperatureCelcius(), getRelativeHumidity() and getPressure() use the updated values. Useful in case all functions are all called at the same time.
-#### getTemperatureCelcius(const bool performMeasurement) 
+This function takes a forced measurement which means getTemperatureCelcius(), getPressure() (and getRelativeHumidity() if a BME280 is connected) use the updated values. Useful in case all functions are all called at the same time. The funcion will return an error if the sensor might be unavailable.
+#### getTemperatureCelsius(const bool performMeasurement) 
 This function can be used to retrieve the temperature. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getTemperatureCelcius() function is called.
-#### getRelativeHumidity(const bool performMeasurement) 
-This function can be used to retrieve the humidity. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getRelativeHumidity() function is called.
 #### getPressure(const bool performMeasurement) 
 This function can be used to retrieve the pressure. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getPressure() function is called.
+#### getRelativeHumidity(const bool performMeasurement) - only when BME280 is connected
+This function can be used to retrieve the humidity. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getRelativeHumidity() function is called.
 
 
 ## Installation
@@ -63,4 +74,4 @@ This function can be used to retrieve the pressure. The parameter defaults to fa
 Press the green _clone or download_ button in the upper-right and download as _.ZIP_. Then go to the Arduino IDE and go to _Sketch_>Use Library->Add .ZIP Library_ and select the just downloaded zip file.
 
 #### Library Manager
-Open up the Library Manager in the Arduino IDE and search for *Forced-BME280*. Select the desired version; higher means more features ;).
+Open up the Library Manager in the Arduino IDE and search for *Forced-BMX280*. Select the desired version; higher means more features ;).
