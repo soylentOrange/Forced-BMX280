@@ -11,8 +11,8 @@
 #include "forcedBMX280.h"  // https://github.com/soylentOrange/Forced-BMX280
 
 /* Test-ino for BMX280 library
-   Uses the minmal version of the library (int32_t result of temperature)
-   Uses an Arduino Nano and a BME280/BMP280 sensor connected to Pin A4/A5
+   Uses the full version of the library (integer and float result of temperature, pressure and humidity)
+   Uses an Arduino Nano and a BME280 sensor connected to Pin A4/A5
    Note to myself: yellow wire is SDA, connected to pin A4
                    green wire is SCL, connected to pin A5
    Components are 5V tolerant (using an on-bord LDO)
@@ -88,7 +88,7 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
   Serial.println(dashLine);
   Serial.println("BMX280 ready");
-  Serial.print("\tChipID = 0x");
+  Serial.print("\tChipID: 0x");
   Serial.println(climateSensor.getChipID(), HEX);
   Serial.println(dashLine);
 }
@@ -101,7 +101,7 @@ void loop() {
 
     // // uncomment this block to print temperature - int32_t
     // g_temperature = climateSensor.getTemperatureCelsius();
-    // Serial.print("Temperature = ");
+    // Serial.print("Temperature: ");
     // Serial.print(g_temperature/100);
     // Serial.print(".");
     // Serial.print(g_temperature%100);
@@ -109,13 +109,13 @@ void loop() {
 
     // uncomment this block to print temperature - float
     g_temperature_float = climateSensor.getTemperatureCelsius_float(true);
-    Serial.print("Temperature = ");
+    Serial.print("Temperature: ");
     Serial.print(g_temperature_float);
     Serial.println(" °C");
 
     // // uncomment this block to print pressure - uint32_t
     // g_pressure = climateSensor.getPressure();
-    // Serial.print("Pressure = ");
+    // Serial.print("Pressure: ");
     // Serial.print(g_pressure/100);
     // Serial.print(".");
     // Serial.print(g_pressure%100);
@@ -123,13 +123,13 @@ void loop() {
 
     // uncomment this block to print pressure - float
     g_pressure_float = climateSensor.getPressure_float();
-    Serial.print("Pressure = ");
+    Serial.print("Pressure: ");
     Serial.print(g_pressure_float);
     Serial.println(" hPa");
 
     // // uncomment this block to print humidity - uint32_t
     // g_humidity = climateSensor.getRelativeHumidity();
-    // Serial.print("Humidity = ");
+    // Serial.print("Humidity: ");
     // Serial.print(g_humidity/100);
     // Serial.print(".");
     // Serial.print(g_humidity%100);
@@ -137,7 +137,7 @@ void loop() {
 
     // uncomment this block to print humidity - float
     g_humidity_float = climateSensor.getRelativeHumidity_float();
-    Serial.print("Humidity = ");
+    Serial.print("Humidity: ");
     Serial.print(g_humidity_float);
     Serial.println(" %rh");
   }
