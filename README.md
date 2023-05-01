@@ -7,6 +7,19 @@
 
 ---
 
+## Abstract
+Small and efficient library for reading ambient temperature and barometric pressure from Bosch Sensortec [Pressure sensor BMP280](https://www.bosch-sensortec.com/products/environmental-sensors/pressure-sensors/bmp280/) and relative humidity from Bosch Sensortec [Humidity sensor BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) with a unified interface. It was intended to be used with the [ATtiny85](https://www.microchip.com/en-us/product/ATtiny85) on the [DigiSpark](https://www.azdelivery.de/en/products/digispark-board) running the [ATTinyCore](https://github.com/SpenceKonde/ATTinyCore) Bootloader. To reduce size of your compiled binary, different classes are available supporting only the functionality needed in your project.  
+
+## Table of Contents
+
+* [Why do we need this library](#Why-do-we-need-this-library)
+* [Why do we need this ATtiny_PWM library](#why-do-we-need-this-ATtiny_PWM-library)
+  * [Features](#features)
+
+---
+
+## Why do we need this library
+
 There isn't a large amount of small, efficient and easy to use libraries for the BME280; that's what [JVKran](https://github.com/JVKran/Forced-BME280) found out.
 That was the main goal of this entire library.
 
@@ -36,12 +49,12 @@ The name of this respository stands for the mode in which the sensor is used. In
 
 
 ## Example
-Examples cann be obtained from within the Arduino IDE in File->Examples->forcedBMX280->[BME280_full_example/BMX280_minimal_example].
+Examples can be obtained from within the Arduino IDE in File->Examples->forcedBMX280->[BME280_full_example/BMX280_minimal_example]. The bare minimum is given below
 ```c++
 #include <forcedBMX280.h>
 
-// Create an instance of a BMX280. The parameters I2C bus and I2C address are optional. For example:
-// - ForcedBMX280 climateSensor = ForcedBMX280();
+// Create an instance of a BMX280. The parameters I2C bus and I2C address are optional. 
+// For example:
 // - ForcedBMX280 climateSensor = ForcedBMX280(TinyWireM, BMX280_I2C_ALT_ADDR);
 
 ForcedBMX280 climateSensor = ForcedBMX280(); 
@@ -51,9 +64,7 @@ void setup() {
 	Wire.begin(); 				// Or "TinyWireM.begin()" when using an ATtiny.
 	
 	// you might want to check if the sensor is available when "starting it up"
-	while(climateSensor.begin()) {
-	  delay(100);
-	} 
+	climateSensor.begin();
 }
 
 void loop() {
@@ -64,33 +75,34 @@ void loop() {
 }
 ```
 
-> This library automatically determines wether to use TinyWireM or Wire. The only thing the user has to take care of, is to make sure begin() is called
-on the appropriate instance in the _setup()_; _TinyWireM.begin()_ or _Wire.begin_.
+> This library automatically determines wether to use TinyWireM or Wire. The only thing the user has to take care of, is to make sure begin() is called on the appropriate instance in the _setup()_; _TinyWireM.begin()_ or _Wire.begin_.
 
 ## Functions
 #### uint8_t begin() 
 This function initializes the library. Call before use...  
 The funcion will return an error if the sensor is unavailable:
-* ERROR_BUS (0x01) - Some error with the two-wire bus
-* ERROR_SENSOR_TYPE (0x02) - Chip-ID doesn't match our expectations. Needs to be 0x58 for BMP280 and 0x60 for BME280
+* ERROR_BUS (0x01) - Some error with the two-wire bus,
+* ERROR_SENSOR_TYPE (0x02) - Chip-ID doesn't match our expectations (needs to be 0x58 for BMP280 and 0x60 for BME280),
 * or 0 if everything went well.
+#### uint8_t getChipID()
+Will return the Chip-ID as read with begin().
 #### uint8_t takeForcedMeasurement() 
-This function takes a forced measurement which means getTemperatureCelcius(), getPressure() (and getRelativeHumidity() if a BME280 is connected) use the updated values. Useful in case all functions are all called at the same time.  
+This function takes a forced measurement which means getTemperatureCelsius(), getPressure() (if class ForcedBMP280 or ForcedBME280 is used) and getRelativeHumidity() (if class ForcedBME280 is used and a BME280 is connected) use the updated values. Useful in case all functions are all called at the same time or you want to check the sensor's availability.  
 The funcion will return an error if the sensor is unavailable:
-* ERROR_BUS (0x01) - Some error with the two-wire bus
+* ERROR_BUS (0x01) - Some error with the two-wire bus,
 * or 0 if everything went well.
 #### int32_t getTemperatureCelsius(const bool performMeasurement) 
-This function can be used to retrieve the temperature. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getTemperatureCelcius() function is called.
+This function can be used to retrieve the temperature. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getTemperatureCelsius() function is called. The function is available in all classes. 
 #### float getTemperatureCelsiusAsFloat(const bool performMeasurement) 
-See above, but using float for the result. 
+See above, but using float for the result. The function is available in all classes ending with Float (i.e. ForcedBMX280Float, ForcedBMP280Float, ForcedBME280Float).
 #### uint32_t getPressure(const bool performMeasurement) 
-This function can be used to retrieve the pressure. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getPressure() function is called.
+This function can be used to retrieve the pressure. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getPressure() function is called. The function is available in ForcedBMP280 and ForcedBME280 and their Float counterparts.
 #### float getPressureAsFloat(const bool performMeasurement) 
-See above, but using float for the result. 
+See above, but using float for the result. The function is available in ForcedBMP280Float and ForcedBME280Float.
 #### uint32_t getRelativeHumidity(const bool performMeasurement) - only when BME280 is connected
-This function can be used to retrieve the humidity. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getRelativeHumidity() function is called.
+This function can be used to retrieve the humidity. The parameter defaults to false which means takeForcedMeasurement() should be called first to make sure updated values are used. If the passed parameter is equal to true, a forced measurement is taken; useful in case only the getRelativeHumidity() function is called. The function is only available in ForcedBME280 and ForcedBME280Float.
 #### float getRelativeHumidityAsFloat(const bool performMeasurement) - only when BME280 is connected
-See above, but using float for the result. 
+See above, but using float for the result. The function is only available in ForcedBME280Float.
 
 
 ## Installation
