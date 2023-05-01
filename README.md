@@ -1,4 +1,12 @@
 # Forced-BMX280
+
+[![arduino-library-badge](https://www.ardu-badge.com/badge/forcedBMX280.svg?)](https://www.ardu-badge.com/forcedBMX280)
+[![GitHub release](https://img.shields.io/github/release/soylentOrange/Forced-BMX280.svg)](https://github.com/soylentOrange/Forced-BMX280/releases)
+![GitHub](https://img.shields.io/github/license/soylentOrange/Forced-BMX280)(https://github.com/soylentOrange/Forced-BMX280/blob/master/LICENSE)
+![GitHub issues](https://img.shields.io/github/issues/soylentOrange/Forced-BMX280)(https://github.com/soylentOrange/Forced-BMX280/issues)
+
+---
+
 There isn't a large amount of small, efficient and easy to use libraries for the BME280; that's what [JVKran](https://github.com/JVKran/Forced-BME280) found out.
 That was the main goal of this entire library.
 
@@ -28,7 +36,7 @@ The name of this respository stands for the mode in which the sensor is used. In
 
 
 ## Example
-There has been given an example that can be obtained from below or from within the Arduino IDE in Examples->Forced-BMX280->Test.
+Examples cann be obtained from within the Arduino IDE in File->Examples->forcedBMX280->[BME280_full_example/BMX280_minimal_example].
 ```c++
 #include <forcedBMX280.h>
 
