@@ -8,7 +8,7 @@
 ---
 
 ## Abstract
-Small and efficient library for reading ambient temperature and barometric pressure from Bosch Sensortec [Pressure sensor BMP280](https://www.bosch-sensortec.com/products/environmental-sensors/pressure-sensors/bmp280/) and relative humidity from [Humidity sensor BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) with a unified interface. It was intended to be used with the [ATtiny85](https://www.microchip.com/en-us/product/ATtiny85) on the [DigiSpark](https://www.azdelivery.de/en/products/digispark-board) running the [ATTinyCore](https://github.com/SpenceKonde/ATTinyCore) Bootloader. To reduce size of your compiled binary, different classes are available supporting only the functionality needed in your project.  
+Small and efficient library for reading ambient temperature and barometric pressure from Bosch Sensortec [Pressure sensor BMP280](https://www.bosch-sensortec.com/products/environmental-sensors/pressure-sensors/bmp280/) and relative humidity from [Humidity sensor BME280](https://www.bosch-sensortec.com/products/environmental-sensors/humidity-sensors-bme280/) with a unified interface. It was intended to be used with the [ATtiny85](https://www.microchip.com/en-us/product/ATtiny85) on the [DigiSpark](https://www.azdelivery.de/en/products/digispark-board) running the [ATTinyCore](https://github.com/SpenceKonde/ATTinyCore) Bootloader. The sensors are set to _forced mode_ without _oversampling_ and _filters_ giving you measurements on request only to minimize current consumption. To reduce size of your compiled binary, different classes are available supporting only the functionality needed in your project.  
 
 ---
 
