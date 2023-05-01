@@ -2,8 +2,8 @@
 
 [![arduino-library-badge](https://www.ardu-badge.com/badge/forcedBMX280.svg?)](https://www.ardu-badge.com/forcedBMX280)
 [![GitHub release](https://img.shields.io/github/release/soylentOrange/Forced-BMX280.svg)](https://github.com/soylentOrange/Forced-BMX280/releases)
-![GitHub](https://img.shields.io/github/license/soylentOrange/Forced-BMX280)(https://github.com/soylentOrange/Forced-BMX280/blob/master/LICENSE)
-![GitHub issues](https://img.shields.io/github/issues/soylentOrange/Forced-BMX280)(https://github.com/soylentOrange/Forced-BMX280/issues)
+[![GitHub](https://img.shields.io/github/license/soylentOrange/Forced-BMX280)](https://github.com/soylentOrange/Forced-BMX280/blob/master/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/soylentOrange/Forced-BMX280)](https://github.com/soylentOrange/Forced-BMX280/issues)
 
 ---
 
